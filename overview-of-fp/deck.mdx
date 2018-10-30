@@ -4,63 +4,6 @@ export { default as theme } from '../theme'
 
 ---
 
-## Quick arrow function review
-
----
-
-### Python
-
-```python
-double = lambda x: x * 2
-```
-
-### Javascript
-
-```js
-const double = x => x * 2;
-```
-
----
-
-```js
-const sayHi = function() {
-  console.log("hi");
-};
-// () required with no params
-const sayHiArrowFunc = () => {
-  console.log("hi");
-};
-```
-
----
-
-```js
-// () are optional for single argument
-const oneArg = arg => {
-  console.log(typeof arg);
-};
-
-// () are required for more than one argument
-const twoArgs = (argOne, argTwo) => {
-  console.log(typeof argOne);
-  console.log(typeof argTwo);
-};
-```
-
----
-
-```js
-// explicit return
-const explicit = arg => {
-  return typeof arg;
-};
-
-// implicit return
-const implicit = arg => typeof arg;
-```
-
----
-
 ## Terminology
 
 ---
@@ -247,6 +190,63 @@ callsCallbackWithGreeting(console.log); // logs "Hello!"
 > An anonymous function (function literal, lambda abstraction, or lambda expression) is a function definition that is not bound to an identifier. Anonymous functions are often arguments being passed to higher-order functions, or used for constructing the result of a higher-order function that needs to return a function.
 
 — wikipedia
+
+---
+
+## Quick arrow function review
+
+---
+
+### Python
+
+```python
+double = lambda x: x * 2
+```
+
+### Javascript
+
+```js
+const double = x => x * 2;
+```
+
+---
+
+```js
+const sayHi = function() {
+  console.log("hi");
+};
+// () required with no params
+const sayHiArrowFunc = () => {
+  console.log("hi");
+};
+```
+
+---
+
+```js
+// () are optional for single argument
+const oneArg = arg => {
+  console.log(typeof arg);
+};
+
+// () are required for more than one argument
+const twoArgs = (argOne, argTwo) => {
+  console.log(typeof argOne);
+  console.log(typeof argTwo);
+};
+```
+
+---
+
+```js
+// explicit return
+const explicit = arg => {
+  return typeof arg;
+};
+
+// implicit return
+const implicit = arg => typeof arg;
+```
 
 ---
 
