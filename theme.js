@@ -8,7 +8,7 @@ export default {
   // extends the default theme
   ...dark,
   // add a custom font
-  font: "monospace",
+  font: "Fira Code, monospace",
   // custom colors
   colors: {
     text: "#dedede",
