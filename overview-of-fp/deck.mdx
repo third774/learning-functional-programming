@@ -1,0 +1,340 @@
+export { default as theme } from '../theme'
+
+# Overview of Functional Programming
+
+---
+
+## Quick arrow function review
+
+---
+
+Python
+
+```python
+double = lambda x: x * 2
+```
+
+Javascript
+
+```js
+const double = x => x * 2;
+```
+
+---
+
+```js
+const sayHi = function() {
+  console.log("hi");
+};
+// () required with no params
+const sayHiArrowFunc = () => {
+  console.log("hi");
+};
+```
+
+---
+
+```js
+// () are optional for single argument
+const oneArg = arg => {
+  console.log(typeof arg);
+};
+
+// () are required for more than one argument
+const twoArgs = (argOne, argTwo) => {
+  console.log(typeof argOne);
+  console.log(typeof argTwo);
+};
+```
+
+---
+
+```js
+// explicit return
+const explicit = arg => {
+  return typeof arg;
+};
+
+// implicit return
+const implicit = arg => typeof arg;
+```
+
+---
+
+## Terminology
+
+---
+
+## Imperative Programming
+
+> Imperative programming is a programming paradigm that uses statements that change a program's state. In much the same way that the imperative mood in natural languages expresses commands, an imperative program consists of commands for the computer to perform. Imperative programming focuses on describing how a program operates.
+
+— wikipedia
+
+```notes
+Explicit step by step (proceedural) instructions on how to execute.
+
+Languages like C or Assembly are some examples of languages that are very imperative
+```
+
+---
+
+## Declarative Programming
+
+> Declarative programming is a programming paradigm that expresses the logic of a computation without describing its control flow.
+
+— wikipedia (roughly)
+
+```notes
+Instructions on what to do - not how. Obviously instructions need to be written somewhere, to do so declaratively you're breaking instructions into very small functions and composing them together.
+
+SQL expressions for example are very declarative. You aren't instructing it HOW to get the data, just describing the data that you want, and you will get the results back.
+```
+
+---
+
+## Immutability
+
+The property of being unchangable.
+
+```notes
+This is implicit for primitive values which are stored by value and not reference, however some languages/libraries provide immutable data structures which apply this such that any change to an that data structure produces an entirely new instance of that structure.
+
+Even when this is not enforced by the language, this can be enforced by convention. Ther is a trade-off though. Languages where immutability isn't baked into the language typically aren't as optimized for it, so creating these copies comes with some additional overhead.
+
+That said, the benefits immutability provides in terms of being able to reason about things is usually worth it. As always - profile before optimizing.
+```
+
+---
+
+## Pure Functions
+
+- Optionally can take in some arguments.
+- Does not mutate arguments that were passed in.
+- Given the same inputs, always produces the same output.
+- Cannot be relying on values that were not passed in as arguments.
+- Must be a "total" function - every valid input will produce a valid output
+- Cannot call "impure" functions
+
+```notes
+Optional arguments - a function that doesn't take any arguments are essentially constants, and in some languages the function declaration is shaped such that you cannot write a function that takes no arguments without really going out of your way. By default you'd basically just end up declaring a value into a variable.
+
+Respecting Immutability
+
+external things like a system clock, or even a reference to "this" or "self" -
+member variables on instantiated objects are implicit arguments to your function. Can end up producing different values on invocation if state changed.
+
+total - all resulting values must match the function's type signature. For example: cannot have a Int -> Bool function that returns null
+"partial" is not total - any function that can throw an exception is also partial
+
+A useful concept from mathematics:
+A function can be viewed as a mapping from one set of values to another.
+* Domain - all of the possible values of the type that can be passed into a function
+* Codomain - the return type of the function - .length function example String -> Int - isEven will have Bool as the codomain
+* Range - all of the possible results of a function being called with domain values - timesTwo func will not have odd numbers in the range
+```
+
+---
+
+## What does function purity buy us?
+
+- Easy to unit test
+- Easy to reason about
+- Greater function re-use
+- Memoization
+
+```notes
+Don't have to mock things.
+You end up with lots more functions that are all alot smaller, and thus easier to reason about.
+Because you end up with a lot more small functions, you end up finding that some of the bits of your
+code were actually doing the same thing and can re-use code with function composition
+```
+
+---
+
+## Memoization
+
+> Memoization is an optimization technique used primarily to speed up computer programs by storing the results of expensive function calls and returning the cached result when the same inputs occur again.
+
+— wikipedia
+
+---
+
+## Side Effect
+
+> A function or expression is said to have a side effect if it modifies some state outside its local environment, that is to say has an observable interaction with the outside world besides returning a value.
+
+— wikipedia
+
+```notes
+Side effects are necessary to do anything useful. If you have a program with no side effects, it is not observable and does nothing other than warm the box.
+```
+
+---
+
+## Side Effect Examples
+
+- Modifying a non-local variable
+- Modifying a static local variable
+- Modifying a mutable argument passed by reference
+- Performing I/O
+- Calling other side-effect functions
+
+```notes
+Can you tell that this function was run? (checking for effects?)
+Touched a file
+Wrote to a buffer
+Touched/created a connection to a database
+
+Necessary - by definition - without them we can't do anything anyone can notice - which is useless
+```
+
+---
+
+## Side Effects have downsides
+
+Kinda hard to reason about.
+
+```notes
+If you mutate something, now you have to keep track of that. Have I called it once? Twice? Has something else called it behind my back?
+Every kind of race condition or order dependent thing comes from side effects.
+
+Pure functions in contrast are very easy to reason about because it, by definition it is not touching or relying on anything outside of that function
+
+It's important to note that impure functions are not bad — again, without them we cannot do anything useful. But we gain a lot by separating them out.
+```
+
+---
+
+## Controlled vs. Uncontrolled Side Effects
+
+Some statically type languages are capable of actually enforcing function purity through the type system. These are called "controlled" side effects. All other languages
+are called "uncontrolled", and it is up to developers to maintain that function purity.
+
+```notes
+For example, in haskell, there is a type called IO which indicates a side effect. For example, if you have a function that reads in some input from
+the user, that function would have the return type IO of string. In Purescript, the types can be even more specific as to what caused the IO. For example
+if you're looking at a function that accepts a string as the argument and produces an AjaxIO of number, the string is probably a url, and the number
+will either be a status code or some response from the server - and you can reasonably infer that just from looking at the type signature and not looking
+at the function name or a single line of code in the implementation
+```
+
+---
+
+## First Class Functions
+
+Functions that can be passed around as arguments in the same way you could pass strings, integers, etc.
+They can be declared like variables, pass them into functions, can create them on the fly, and can return them from functions.
+
+```js
+function add(a) {
+  return function(b) {
+    return a + b;
+  };
+}
+console.log(add(3)(4)); // logs "7"
+
+function callsCallbackWithGreeting(callback) {
+  return callback("Hello!");
+}
+callsCallbackWithGreeting(console.log); // logs "Hello!"
+```
+
+---
+
+## Lambda Function
+
+> An anonymous function (function literal, lambda abstraction, or lambda expression) is a function definition that is not bound to an identifier. Anonymous functions are often arguments being passed to higher-order functions, or used for constructing the result of a higher-order function that needs to return a function.
+
+— wikipedia
+
+---
+
+## Higher Order Functions
+
+A function that accepts one or more functions as arguments
+
+```js
+document.getElementById("some-button").addEventListener("click", () => {
+  // note that usage of alert() here makes this impure
+  alert("YOU CLICKED");
+});
+```
+
+```notes
+Higher order functions are a big part of functional programming, so we'll be seeing a lot
+of these. If a language does not have first class functions and higher order functions, it
+will be very difficult to program in a functional style.
+
+Callbacks are an example everyone probably knows, but are often impure.
+```
+
+---
+
+## Some Examples of Higher Order Functions
+
+---
+
+## Map
+
+```js
+const names = ["john", "susan", "jane"];
+const capitalizeFirstLetter = str => str.charAt(0).toUpperCase() + str.slice(1);
+const capitalizedNames = names.map(capitalizeFirstLetter); // produces ["John", "Susan", "Jane"]
+```
+
+```notes
+Say you have a container with something(s) in it, and a function that operates on the type that is contained.
+Map allows you to perform that operation on the thing(s) within that container.
+
+Map is a very powerful concept that applies to a LOT of different containers.
+Because we're not using a for loop here, we don't have to pay attention to
+incrementing the index correctly to iterate over each item in the array. We
+trust that the array knows how to correctly behave when we tell it to map with
+the function we gave it.
+
+For loops are powerful, but iterating over each item in an array and performing
+some operation on it is so common that it having it's own name and abstraction
+that hides implementation details is worth having and using.
+
+Arrays are probably the one people are familiar with the most, but the same
+concept applies to other structures like a Maybe for example. If the Maybe
+does not contain a value, it will not perform the the function
+```
+
+---
+
+## Filter
+
+```js
+const names = ["john", "susan", "jane"];
+const startsWithJ = str => str.charAt(0).toUpperCase() === "J";
+const capitalizedNames = names.filter(startsWithJ); // produces ["john", "jane"]
+```
+
+```notes
+filter on the other hand is more specific to arrays, but is still very useful.
+This higher order function takes what's called a "predicate" — a function that
+will return a boolean — and will exclude that item if the predicate returns false
+```
+
+---
+
+## Reduce/Fold
+
+```js
+const someNumbers = [1, 2, 3];
+const sum = someNumbers.reduce((accumulator, value) => accumulator + value, 0); // produces 6
+
+const plus = (a, b) => a + b;
+const anotherSum = someNumbers.reduce(plus, 0); // also produces 6
+
+const someStrings = ["foo", "bar", "baz"];
+const concatStrings = someStrings.reduce(plus, ""); // produces "foobarbaz"
+
+const lengthOfArray = someStrings.reduce(accumulator => accumulator + 1, 0); // produces 3
+```
+
+```notes
+This function aggregates values into a single value. Note the default value that is provided.
+```
