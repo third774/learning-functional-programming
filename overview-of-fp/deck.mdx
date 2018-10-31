@@ -169,6 +169,8 @@ at the function name or a single line of code in the implementation
 Functions that can be passed around as arguments in the same way you could pass strings, integers, etc.
 They can be declared like variables, pass them into functions, can create them on the fly, and can return them from functions.
 
+---
+
 ```js
 function add(a) {
   return function(b) {
@@ -279,8 +281,10 @@ Callbacks are an example everyone probably knows, but are often impure.
 
 ```js
 const names = ["john", "susan", "jane"];
-const capitalizeFirstLetter = str => str.charAt(0).toUpperCase() + str.slice(1);
-const capitalizedNames = names.map(capitalizeFirstLetter); // produces ["John", "Susan", "Jane"]
+const capitalizeFirstLetter = str =>
+  str.charAt(0).toUpperCase() + str.slice(1);
+const capitalizedNames = names.map(capitalizeFirstLetter);
+// produces ["John", "Susan", "Jane"]
 ```
 
 ```notes
@@ -324,15 +328,19 @@ will return a boolean — and will exclude that item if the predicate returns fa
 
 ```js
 const someNumbers = [1, 2, 3];
-const sum = someNumbers.reduce((accumulator, value) => accumulator + value, 0); // produces 6
-
-const plus = (a, b) => a + b;
-const anotherSum = someNumbers.reduce(plus, 0); // also produces 6
+const sum = someNumbers.reduce(
+  (accumulator, value) => accumulator + value,
+  0
+); // produces 6
 
 const someStrings = ["foo", "bar", "baz"];
-const concatStrings = someStrings.reduce(plus, ""); // produces "foobarbaz"
+const concatStrings = someStrings.reduce((acc, val) => acc + val, "");
+// produces "foobarbaz"
 
-const lengthOfArray = someStrings.reduce(accumulator => accumulator + 1, 0); // produces 3
+const lengthOfArray = someStrings.reduce(
+  accumulator => accumulator + 1,
+  0
+); // produces 3
 ```
 
 ```notes
