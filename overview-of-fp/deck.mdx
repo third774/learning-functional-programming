@@ -4,6 +4,14 @@ export { default as theme } from '../theme'
 
 ---
 
+## Quick note
+
+This is all from a podcast called Lambdacast.
+
+You should check it out.
+
+---
+
 ## Terminology
 
 ---
@@ -179,6 +187,8 @@ function add(a) {
 }
 console.log(add(3)(4)); // logs "7"
 
+[1,2,3].map(add(1)) // produces [2,3,4]
+
 function callsCallbackWithGreeting(callback) {
   return callback("Hello!");
 }
@@ -346,3 +356,16 @@ const lengthOfArray = someStrings.reduce(
 ```notes
 This function aggregates values into a single value. Note the default value that is provided.
 ```
+---
+
+## Topics we'll cover in depth the future
+* Higher Order Functions
+* Recursion
+* Morphisms/Polymorphism and Abstractions
+* Partial Application
+* Monoids
+* Algebraic Data Types
+* Functors
+* Applicative Functors
+* Monads
+* Type Parameters
