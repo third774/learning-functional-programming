@@ -2,6 +2,8 @@
 import { dark } from "mdx-deck/themes";
 import codeTheme from "react-syntax-highlighter/styles/prism/twilight";
 import prismJs from "react-syntax-highlighter/languages/prism/javascript";
+import prismTs from "react-syntax-highlighter/languages/prism/typescript";
+import prismHaskell from "react-syntax-highlighter/languages/prism/haskell";
 import prismPython from "react-syntax-highlighter/languages/prism/python";
 
 export default {
@@ -26,7 +28,9 @@ export default {
     style: codeTheme,
     languages: {
       javascript: prismJs,
-      python: prismPython
+      python: prismPython,
+      haskell: prismHaskell,
+      typescript: prismTs
     }
   }
 };
