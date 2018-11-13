@@ -1,5 +1,7 @@
 export { default as theme } from "../theme";
 
+# 𝝺
+
 # Polymorphism & Abstraction
 
 ```notes
@@ -102,12 +104,8 @@ Are there any assertions we can safely make about it given only the type signatu
 * It can't return null
 
 The only possible meaningful implementation is that the argument passed in is returned.
-I say meaningful because you could declare some local variable within it and then
-do nothing with it. But it is still referentially transparent. If you swapped one version
-that doesn't declare a local variable for one that does, it would have no meaningful
-impact on the output of your program. It would have a little more overhead in terms
-of memory/cpu, but it doesn't change the correctness of the program.
 
+I say meaningful because you could declare some local variable within it and then do nothing with it. But it is still referentially transparent. If you swapped one version that doesn't declare a local variable for one that does, it would have no meaningful impact on the output of your program. It would have a little more overhead in terms of memory/cpu, but it doesn't change the correctness of the program.
 ```
 
 ---
@@ -121,18 +119,19 @@ foo :: Int -> Int
 ```notes
 What do we know about this function?
 
-Could pass the value straight through?
-Could just return a constant?
-Could add 5?
-Could add 6?
-Could multiply by 5?
-Could multiply by 6?
+* Could pass the value straight through?
+* Could just return a constant?
+* Could add 5?
+* Could add 6?
+* Could multiply by 5?
+* Could multiply by 6?
 
 The list of possible implementations is practically infinite
 
 There is a cost to being specific. Concreteness has a cost.
-The less we know about a type - the more we know about what it does.
-The more we know about a type - the less we know about what it does.
+* The less we know about a type - the more we know about what it does.
+* The more we know about a type - the less we know about what it does.
+
 There is an inverse relationship here.
 ```
 
@@ -149,12 +148,9 @@ bar :: a -> b -> a
 ```notes
 What do we know about this function?
 
-Can only give back the a
+It can only give back the a
 
-This is called const. This is actually useful. It sounds crazy. I'm not
-even sure I understand the ways in which this IS useful, but when you
-have an ecosystem of these smaller composable functions, you find some
-interesting applications for them.
+This is called const. This is actually useful. It sounds crazy. I'm not even sure I understand the ways in which this IS useful, but when you have an ecosystem of these smaller composable functions, you find some interesting applications for them.
 ```
 
 ---
@@ -166,8 +162,7 @@ baz :: a -> a -> a
 ```notes
 What is possible here?
 
-The specific implementation will need to pick which one it wants to
-always return, and it will always return that one.
+The specific implementation will need to pick which one it wants to always return, and it will always return that one.
 ```
 
 ---
@@ -177,8 +172,7 @@ quux :: [a] -> a
 ```
 
 ```notes
-What if the list is empty? Implicit in the list type is the ability
-to be empty.
+What if the list is empty? Implicit in the list type is the ability to be empty.
 
 This is illegal. Will not compile.
 
@@ -196,23 +190,18 @@ This is the same type signature as head
 
 What do we know about this?
 
-Still cannot construct new a's
-Could return Nothing every time
+* Still cannot construct new a's
+* Could return Nothing every time
 
 What do we know the list DIDN'T do to the a?
 
 If we got an a back - it came from the list
 
-The real power here is that just by looking at the
-type signature, we can make assertions about what the
-function does.
+The real power here is that just by looking at the type signature, we can make assertions about what the function does.
 
-This is why purity and immutability are requirements.
-If we threw those out, we could NOT make these same
-assertions. It is also why there is such an intense
-focus on type signatures. As we continue down the road
-of FP, we'll continue to be looking very closely at
-type signatures.
+This is why purity and immutability are requirements. If we threw those out, we could NOT make these same assertions. It is also why there is such an intense focus on type signatures.
+
+As we continue down the road of FP, we'll continue to be looking very closely at type signatures.
 ```
 
 ---
@@ -238,7 +227,9 @@ Map a b -- Dictionaries are called Maps in haskell
 
 ```notes
 Data structures can be parameterized by more than one type.
+
 Dictionaries could have different types for their keys and values
+
 You've also got tuples
 ```
 
@@ -283,12 +274,11 @@ f a
 ```
 
 ```notes
-This is where intuitions can start to break down. Most languages don't have
-the capability to express this. Some that do are haskell, purescript, scala
+This is where intuitions can start to break down. Most languages don't have the capability to express this. Some that do are haskell, purescript, scala
 
 So, the f here could be any type that is parameterized by another type.
-It could be a list of a, but it could also be a maybe of a. It could be a
-Future of a (like a promise)
+
+It could be a list of a, but it could also be a maybe of a. It could be a Future of a (like a promise)
 ```
 
 ---
@@ -302,11 +292,9 @@ We're back at identity
 
 This is where constraints REALLY come in.
 
-If you put constraints on the a with a List of a we can start to do things like
-combine them in some way and give back an a, and that's useful
+If you put constraints on the a with a List of a we can start to do things like combine them in some way and give back an a, and that's useful!
 
-If we constrain the f though - we can start to do some interesting things.
-What if we knew that f had a mystery function with the following interface?
+If we constrain the f though - we can start to do some really interesting things. What if we knew that f had a mystery function with the following interface?
 ```
 
 ---
@@ -316,16 +304,15 @@ mystery :: HasOurMysteryThing f => (a -> b) -> f a -> f b
 ```
 
 ```notes
-Let's take a look at this type signature and see if we can figure out
-what function this matches. We have a (a -> b) function as our first parameter,
-an f of a as our second, and we will produce an f of b. Keep in mind that f
-here is alredy constrained to be able to take part in this operation. If there
-was no constraint at all, we couldn't change anything.
+Let's take a look at this type signature and see if we can figure out what function this matches.
+
+We have a (a -> b) function as our first parameter, an f of a as our second, and we will produce an f of b.
+
+Keep in mind that f here is alredy constrained to be able to take part in this operation. If there was no constraint at all, we couldn't change anything.
 
 Can anyone guess?
 
-Given that we know nothing about a or b, we can probably guess that we're going
-to use the (a -> b) function to turn our a into a b, right?
+Given that we know nothing about a or b, we can probably guess that we're going to use the (a -> b) function to turn our a into a b, right?
 ```
 
 ---
@@ -335,20 +322,19 @@ fmap :: Functor f => (a -> b) -> f a -> f b
 ```
 
 ```notes
-This is map. If we have a generic data structure that implements map we have a
-"functor". And each functor has to have its own implementation of map. List of course
-will apply it to each item in the list - maybe MIGHT apply the function if the Maybe
-actually contains a value. If it doesn't, it won't run it.
+This is map! If we have a generic data structure that implements map we have a "functor". And each functor has to have its own implementation of map.
+
+List of course will apply it to each item in the list - maybe MIGHT apply the function if the Maybe actually contains a value. If it doesn't, it won't run it.
 
 What can we assert about the resulting f of b value here?
 
 It *WAS* produced by running our (a -> b) function on the f of a ONCE.
+
 There is no other possible implementation.
 
-If you look at map's signature - that function knows nothing about a or b. It only knows
-a LITTLE bit about the f (only that it implements map). When we make our functions highly
-polymorphic, they have to do exactly what they say which is often very constrained. They can't
-deviate from that, and thus we can be sure they will be usable down the road.
+If you look at map's signature - that function knows nothing about a or b. It only knows a LITTLE bit about the f (only that it implements map).
+
+When we make our functions highly polymorphic, they have to do exactly what they say which is often very constrained. They can't deviate from that, and thus we can be sure they will be usable down the road.
 ```
 
 ---
@@ -360,10 +346,7 @@ deviate from that, and thus we can be sure they will be usable down the road.
 ```notes
 Tying this all together is this quote from Edsger Dijkstra
 
-People hear abstraction and think 14 layers of inheritance. That is not abstraction.
-It doesn't help you know more about the thing you're talking about.
+People hear abstraction and think 14 layers of inheritance. That is not abstraction. It doesn't help you know more about the thing you're talking about.
 
-Abstraction is about stripping away everything that is not relevant to the concept being
-conveyed. When you do inheritance in a traditional OO sense, you are almost exclusively
-adding more at each level.
+Abstraction is about stripping away everything that is not relevant to the concept being conveyed. When you do inheritance in a traditional OO sense, you are almost exclusively adding more at each level.
 ```
