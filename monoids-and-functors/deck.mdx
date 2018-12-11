@@ -1,0 +1,215 @@
+import { Appear } from "mdx-deck";
+import { List, ListItem } from "../components/List";
+export { default as theme } from "../theme/theme";
+
+# 𝝺
+
+# Monoids and Functors
+
+```notes
+Today we're going to start getting into some of the "scary" sounding parts of FP - monoids and functors!
+These are concepts from category theory that are used in languages like Haskell.
+
+They're actually not that hard to understand as you'll hopefully see by the end here. Most typed languages don't have a type system that can express these concepts in the type signature of a function (Haskell, Idris, probably some other FP languages), but they're still useful to understand and build an intuition for the value that they bring and how those concepts could be applied to something you may be working on.
+
+There is a pretty small set of these core concepts that can get you really far — similar to how map/filter/reduce make up a core of higher order functions that can get you pretty far. So — once we learn the core type classes, you'll see that these will cover most of the patterns you will see within programming.
+
+So — let's get started!
+```
+
+---
+
+### A quick word about
+
+# Category Theory
+
+```notes
+First - about Category Theory, which is based on abstract mathematics - the mathematics that describes other mathematics. The mathematics that describes why aritmatic works. Why it has the rules that it does.
+
+So — many of the things that we're going to talk about (Monoids included) — you can see parallels to things in mathematics that you may be familiar with.
+
+A lot of these structures were extracted from things that we understood fairly well, like aritmatic — and then once made abstract and generalized it was fairly obvious that it also applies to this thing — and that thing — and that thing.
+
+What would appear to be a disjoint set of concepts can all be unified at least in some aspect under a certain categorical abstraction.
+
+So — Category Theory arose to describe the patterns seen in abstract mathematics and then people who were into Category Theory noticed that some of the things they were doing in programming were patterns they had already seen before. FP then became the effort to see how far they could take that.
+```
+
+---
+
+# Monoids
+
+```notes
+So - monoids. Before we talk about monoids, it will be useful for us to talk about semi-groups.
+```
+
+---
+
+### First let's learn about
+
+# Semigroups
+
+```notes
+Once we've established our understanding of semi-groups, monoids will only have one additional requirement.
+
+A data type that has an operation that allows you to take two elements of that type and combine them together to get another element of that type.
+```
+
+---
+
+### A data type that has an
+
+## "Append" operation
+
+```haskell
+(<>) :: Semigroup a => a -> a -> a
+```
+
+```notes
+Haskell has an operator for this - less than followed by greater than. This is a function that has a constraint that says type 'a' needs to be a Semigroup of type a. It will take an 'a' and second 'a' and return an 'a'.
+
+The append operation defined for a certain data type IS what says that data type is a semi-group because there is this operation that is available for this type.
+
+Simple enough so far? Let's look at some examples.
+```
+
+---
+
+## We can combine lists
+
+```haskell
+"abc" <> "def" == "abcdef"
+[1,2,3] <> [4,5,6] == [1,2,3,4,5,6]
+```
+
+```notes
+So - we see here we can concatenate lists and strings which are just lists of characters. Anything you would think of concatenating together is almost certainly a semigroup.
+```
+
+---
+
+## We can combine numbers
+
+### (in more than one way)
+
+```haskell
+Sum 3 <> Sum 4 == Sum 7
+Product 3 <> Product 4 == Product 12
+```
+
+<Appear>
+  <p>can't just say 3 &lt;&gt; 4 because we don't know the operation</p>
+</Appear>
+
+```notes
+Now, with numbers, there are two different ways that they can be combined that were interested in today - addition and multiplication.
+
+These are separate semigroups. You would say these are "Integers under addition" as one, and "Integers under multiplication" as the other.
+
+In order to use our append (<>) operation here, we need to wrap these numbers in a data-type that implements that append operation for the data type, so we use these Sum and Product data constructors.
+
+Subtraction and division are special cases of addition/multiplication.
+```
+
+---
+
+## We can combine booleans
+
+### (in more than one way)
+
+```haskell
+All True <> All False == False
+Any True <> Any False == True
+```
+
+```notes
+Here are a couple of more interesting cases. Similar to how Sum/Product were a data type wrapping numbers, we're wrapping booleans here.
+
+Does anyone want to take a guess at what the operation is for Any and All?
+```
+
+---
+
+### A Semigroup's append must obey the
+
+## Law of Associativity
+
+```haskell
+x <> (y <> z) = (x <> y) <> z (Semigroup law)
+```
+
+```notes
+Semigroups must follow the law of associativity. This means that the order in which the "append" operation is applied does not matter. Note that this does NOT mean you can just move x, y, and z around freely. Their positions cannot change. But you can see here based on these parentheses that we can first apply append to y and z, then take that result and combine it with x - and that should give use the same result as first combining x and y, then combining that with z
+
+Mathematical laws like this typically cannot be enforced by the compiler, so there is some level of responsibility here on the programmer to ensure this law is followed.
+
+You could use something like "Agda" which is a theorem prover to write proofs for these if you wanted, but most languages cannot express this kind of requirement.
+```
+
+---
+
+## Semigroups (recap)
+
+<List>
+  <ListItem>Have an "append" operation for their data type</ListItem>
+  <ListItem>The append operation obeys the Law of Associativity</ListItem>
+  <ListItem>That's it!</ListItem>
+</List>
+
+```notes
+That is the end for Semigroups.
+```
+
+---
+
+# What is it good for?
+
+```haskell
+Semigroup a :: [a] -> ???
+```
+
+```notes
+Let's say you have a list of type "a". The only thing you know about a is that it's a Semigroup, so we know we have this append operation.
+
+What can we do with the list of those things?
+
+- We can append them together
+- We could reduce them all down together
+- Do you have to combine them in order?
+- If we had a really big list - let's say a million items - knowing this is associative - is there a way we could divide and conquer this thing?
+- Split this into n sublists, have each sublist combine their respective results, then combine the results of those
+```
+
+---
+
+# Producing a single value
+
+```haskell
+Semigroup a :: [a] -> a
+```
+
+```notes
+We know that's safe to do _because_ of the law of associativity. We know nothing about type a, but we're already talking about parallelizing it across multiple threads, and we know that's safe to do. And this works for _anything_ that is a Semigroup.
+
+So when we talk about "getting stuff for free" in terms of reasoning, this is what we're talking about. If you know that something is a Semigroup, you automatically know some pretty useful things that can be done with things of that type.
+
+Associativity seems like this very innocuous thing, but it is very powerful. It's still not obvious to me in many ways.
+```
+
+---
+
+## How about receiving them asynchronously?
+
+```notes
+Could we receive these Semigroup elements asyncronously and collect them? Is that safe?
+
+Could we have an infinite stream of them?
+
+Could we process them while they're coming in?
+
+We could buffer them, batch them together, and then append them. We could maybe wait until we get ten of them and then process them together? A stream of chunks?
+
+We now know a few really neat things we can do with a very tiny little bit of information. All because of our ability to append them together and the law of associativity.
+```
+
+---
