@@ -1,6 +1,6 @@
 // example theme.js
 import { dark } from "mdx-deck/themes";
-import codeTheme from "react-syntax-highlighter/styles/prism/twilight";
+import codeTheme from "./codeTheme";
 import prismJs from "react-syntax-highlighter/languages/prism/javascript";
 import prismTs from "react-syntax-highlighter/languages/prism/typescript";
 import prismHaskell from "react-syntax-highlighter/languages/prism/haskell";
@@ -23,6 +23,10 @@ export default {
     borderRadius: ".5em",
     fontSize: "1.1em",
     fontWeight: "normal"
+  },
+  code: {
+    color: "red",
+    fontFamily: "Fira Code, monospace"
   },
   prism: {
     style: codeTheme,
