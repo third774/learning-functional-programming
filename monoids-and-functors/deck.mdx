@@ -98,7 +98,7 @@ Product 3 <> Product 4 == Product 12
 ```
 
 <Appear>
-  <p>can't just say 3 &lt;&gt; 4 because we don't know the operation</p>
+  <p>(can't just say 3 &lt;&gt; 4 because we don't know the operation)</p>
 </Appear>
 
 ```notes
@@ -139,7 +139,9 @@ x <> (y <> z) = (x <> y) <> z (Semigroup law)
 ```
 
 ```notes
-Semigroups must follow the law of associativity. This means that the order in which the "append" operation is applied does not matter. Note that this does NOT mean you can just move x, y, and z around freely. Their positions cannot change. But you can see here based on these parentheses that we can first apply append to y and z, then take that result and combine it with x - and that should give use the same result as first combining x and y, then combining that with z
+Semigroups must follow the law of associativity. This means that the order in which the "append" operation is applied does not matter. Note that this does NOT mean you can just move x, y, and z around freely. Their positions cannot change. If they were allowed to move like that we would say they are commutative.
+
+But you can see here based on these parentheses that we can first apply append to y and z, then take that result and combine it with x - and that should give use the same result as first combining x and y, then combining that with z
 
 Mathematical laws like this typically cannot be enforced by the compiler, so there is some level of responsibility here on the programmer to ensure this law is followed.
 
@@ -198,10 +200,10 @@ Associativity seems like this very innocuous thing, but it is very powerful. It'
 
 ---
 
-## How about receiving them asynchronously?
+## What about receiving them asynchronously?
 
 ```notes
-Could we receive these Semigroup elements asyncronously and collect them? Is that safe?
+Could we receive these Semigroup elements asynchronously and collect them? Is that safe?
 
 Could we have an infinite stream of them?
 
@@ -213,3 +215,124 @@ We now know a few really neat things we can do with a very tiny little bit of in
 ```
 
 ---
+
+# Back to Category Theory
+
+```notes
+So - this is an example of category theorists looking at addition, subtraction, multiplication and division — studying basic arithmatic — and identifying something that addition and multiplication have in common with each other and abstracting that out and giving it a name. Then down the road - people in programming who were also into category theory recognizing that this is much broader than just math. These concepts all started as very concrete ideas, and were gradually boiled down and abstracted to be much more generally useful.
+```
+
+---
+
+# Monoid
+
+### has one additional rule
+
+```notes
+A monoid is a Semigroup with one thing added.
+```
+
+---
+
+### A Monoid is a
+
+### Semigroup that has an
+
+## Identity value
+
+```haskell
+-- value <> identity
+[1,2,3] <> [] == [1,2,3]
+```
+
+```notes
+It has a value called "identity" that is sort of the "empty" value for that data type. Meaning — if you "append" the identity value to some other value, you get the some other value back unchanged.
+
+You may recall we previously discussed the identity function - it just takes a value and returns it unchanged. Well, functions that go from a -> a are actually a monoid, and the identity function is the identity value for that Monoid. More on that later.
+```
+
+---
+
+## Other examples
+
+```haskell
+-- value <> identity
+"abc" <> "" == "abc"
+Sum 3 <> Sum 0 == Sum 3
+Product 5 <> Product 1 == Product 5
+```
+
+```notes
+So - here are some more examples. Again, strings are just arrays of characters, so an empty string here makes sense as the identity value.
+
+Sum is 0 since adding 0 doesn't change the number. Product is 1 since multiplying by 1 doesn't change the number.
+
+How about the identity value for the All type for booleans we saw earlier? What do you think that is?
+
+And the Any boolean type?
+```
+
+---
+
+```haskell
+-- value <> identity
+All False <> All True == All False
+All True <> All True == All True
+Any True <> Any False == Any True
+Any False <> Any False == Any False
+```
+
+```notes
+So, you can see here that True is the identity value for All type. If you combine it with a False you get back a False. If you combine it with a True you get back True.
+
+Inversely, False is the identity for the Any type. If you combine it with a True you get back a True. If you combine it with a False you get back False.
+```
+
+---
+
+## Monoids
+
+<List>
+  <ListItem>Are semigroups that have an identity value</ListItem>
+  <ListItem>Identity must be commutative</ListItem>
+</List>
+
+```notes
+So, recapping monoids —
+
+They're semigroups that have an identity value
+
+And the identity value must be commutative. It shouldn't matter where you combine in the identity value. It should have no effect regardless.
+```
+
+---
+
+## So what can we do with Monoids?
+
+### (That we couldn't do with Semigroups)
+
+```notes
+So, what can we do with monoids that we couldn't do with Semigroups?
+
+Remember our list of a where a is a Semigroup from earlier and we said we could combine them all down into a single element?
+
+We know we can do that whole divide and conquer strategy, or one at a time, or asynchronously?
+
+There is a specific list in which this will fail.
+
+An empty list — how do you return an a from an empty list of a?
+```
+
+---
+
+## You can fold/reduce a Monoid
+
+## without providing an initial value.
+
+```notes
+So, with a monoid, you can fold or reduce a monoid using its append operation without providing an initial value.
+
+We can safely assume the initial value to be the identity value for that monoid since appending against it will not change the values produced by the append.
+
+The same cannot be said for Semigroups.
+```
