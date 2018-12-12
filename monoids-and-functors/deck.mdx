@@ -274,22 +274,6 @@ And the Any boolean type?
 
 ---
 
-```haskell
--- value <> identity
-All False <> All True == All False
-All True <> All True == All True
-Any True <> Any False == Any True
-Any False <> Any False == Any False
-```
-
-```notes
-So, you can see here that True is the identity value for All type. If you combine it with a False you get back a False. If you combine it with a True you get back True.
-
-Inversely, False is the identity for the Any type. If you combine it with a True you get back a True. If you combine it with a False you get back False.
-```
-
----
-
 ## Monoids
 
 <List>
@@ -332,7 +316,88 @@ An empty list — how do you return an a from an empty list of a?
 ```notes
 So, with a monoid, you can fold or reduce a monoid using its append operation without providing an initial value.
 
-We can safely assume the initial value to be the identity value for that monoid since appending against it will not change the values produced by the append.
+We can safely assume the initial value to be the identity value for that monoid since appending against it will not change the meaning of the first thing we append to it.
 
-The same cannot be said for Semigroups.
+So - this allows us to take any kind of collection thing that is "monoidal" instead of just a Semigroup, and we can always concatenate them all the way down. We don't have to worry about special cases for not having a value like an empty list.
+
 ```
+
+---
+
+```haskell
+mconcat :: Monoid a => [a] -> a
+mconcat = foldr '(<>)' mempty
+```
+
+```notes
+And so there is a special fold that works on Monoids that doesn't take the initial value because it already has it. That initial value is just called "empty" (mempty in Haskell) within the context of the monoid.
+
+What would happen if we were to use this function with an empty list of integers under addition?
+
+How about multiplication?
+
+What about an empty list of lists of integers? (result would be an empty list)
+```
+
+---
+
+# Less obvious Monoids
+
+---
+
+# Booleans?
+
+```notes
+Take a data type like a boolean for example, and let's look at it under a different lens. Remember we looked at numbers under addition and multiplication, and those turned out to be two separate Monoids?
+
+Could we do something similar with booleans?
+
+What operations do we have available to combine them?
+
+With && and || we can combine them — we've got a Semigroup!
+Now, let's pick && for a moment. Does && have an identity value? What about ||?
+```
+
+---
+
+```haskell
+-- identity <> value
+All True <> All False == All False
+All True <> All True == All True
+True && False == False
+True && True == True
+
+Any False <> Any True == Any True
+Any False <> Any False == Any False
+False || True == True
+False || False == False
+```
+
+```notes
+It does! True will not change the other value you combine with it using &&.
+
+You can see here that True is the identity value for All type. If you combine it with a False you get back a False. If you combine it with a True you get back True.
+
+Inversely, False is the identity for the Any type. If you combine it with a True you get back a True. If you combine it with a False you get back False.
+
+So, booleans under the "or" operator are monoids, and so are booleans under the "and" operator!
+```
+
+---
+
+## (a -> a) is a Monoid
+
+```haskell
+-- compose is . or the "dot operator"
+compose :: (b -> c) -> (a -> b) -> (a -> c)
+compose f g x = f (g x)
+<> = compose -- could also just be writted as <> = (.)
+
+identity :: a -> a
+identity a = a
+mempty = identity
+```
+
+---
+
+# 🤯
