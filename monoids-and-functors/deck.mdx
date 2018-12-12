@@ -1,18 +1,16 @@
-import { Appear } from "mdx-deck";
 import { List, ListItem } from "../components/List";
 export { default as theme } from "../theme/theme";
 
 # 𝝺
 
-# Monoids and Functors
+# Monoids
 
 ```notes
-Today we're going to start getting into some of the "scary" sounding parts of FP - monoids and functors!
-These are concepts from category theory that are used in languages like Haskell.
+Today is going to be our first foray into the "scary" sounding parts of FP. We're going to talk about monoids!
 
 They're actually not that hard to understand as you'll hopefully see by the end here. Most typed languages don't have a type system that can express these concepts in the type signature of a function (Haskell, Idris, probably some other FP languages), but they're still useful to understand and build an intuition for the value that they bring and how those concepts could be applied to something you may be working on.
 
-There is a pretty small set of these core concepts that can get you really far — similar to how map/filter/reduce make up a core of higher order functions that can get you pretty far. So — once we learn the core type classes, you'll see that these will cover most of the patterns you will see within programming.
+There is a pretty small set of these core concepts in category theory that can get you really far — similar to how map/filter/reduce make up a core of higher order functions that can let you do dang near anything to a list. So — once you learn these core types, you'll see that these will cover most of the patterns you will see within programming.
 
 So — let's get started!
 ```
@@ -24,23 +22,15 @@ So — let's get started!
 # Category Theory
 
 ```notes
-First - about Category Theory, which is based on abstract mathematics - the mathematics that describes other mathematics. The mathematics that describes why aritmatic works. Why it has the rules that it does.
+First - a quick word about Category Theory. It is based on abstract mathematics which is sort of like the mathematics that describes why aritmatic works. Why math has the rules that it does.
 
-So — many of the things that we're going to talk about (Monoids included) — you can see parallels to things in mathematics that you may be familiar with.
-
-A lot of these structures were extracted from things that we understood fairly well, like aritmatic — and then once made abstract and generalized it was fairly obvious that it also applies to this thing — and that thing — and that thing.
+These ideas were extracted from concrete things in aritmatic — and then once made abstract and generalized it was fairly obvious that it also applies to this thing — and that thing — and that thing.
 
 What would appear to be a disjoint set of concepts can all be unified at least in some aspect under a certain categorical abstraction.
 
-So — Category Theory arose to describe the patterns seen in abstract mathematics and then people who were into Category Theory noticed that some of the things they were doing in programming were patterns they had already seen before. FP then became the effort to see how far they could take that.
-```
+So — Category Theory arose to describe the patterns seen in abstract mathematics and then when some people who were into Category Theory got into programming, they noticed that some of the things they were doing in programming were patterns they had already seen before. It became clear that these concepts extended beyond math.
 
----
-
-# Monoids
-
-```notes
-So - monoids. Before we talk about monoids, it will be useful for us to talk about semi-groups.
+Functional programming languages were then built around those ideas to give them first class support.
 ```
 
 ---
@@ -50,9 +40,10 @@ So - monoids. Before we talk about monoids, it will be useful for us to talk abo
 # Semigroups
 
 ```notes
-Once we've established our understanding of semi-groups, monoids will only have one additional requirement.
+Before we get to monoids, let's talk about Semigroups. Once we've established an understanding of semi-groups, monoids will be just one small step further.
 
-A data type that has an operation that allows you to take two elements of that type and combine them together to get another element of that type.
+A Semigroup can be described as:
+A data type which has an operation that allows you to take two elements of that type and combine them together to get another element of that type.
 ```
 
 ---
@@ -66,7 +57,9 @@ A data type that has an operation that allows you to take two elements of that t
 ```
 
 ```notes
-Haskell has an operator for this - less than followed by greater than. This is a function that has a constraint that says type 'a' needs to be a Semigroup of type a. It will take an 'a' and second 'a' and return an 'a'.
+Haskell has an operator for this - less than followed by greater than. This is a function that has a constraint that says type 'a' needs to be a Semigroup. It will take an 'a' and second 'a' and return an 'a'.
+
+Concatenating two lists is a concrete example of this. We take a list, we take another list, and we produce a list as a result.
 
 The append operation defined for a certain data type IS what says that data type is a semi-group because there is this operation that is available for this type.
 
@@ -93,39 +86,32 @@ So - we see here we can concatenate lists and strings which are just lists of ch
 ### (in more than one way)
 
 ```haskell
-Sum 3 <> Sum 4 == Sum 7
-Product 3 <> Product 4 == Product 12
-```
+3 + 4 == 7
+3 * 4 == 12
 
-<Appear>
-  <p>(can't just say 3 &lt;&gt; 4 because we don't know the operation)</p>
-</Appear>
+```
 
 ```notes
 Now, with numbers, there are two different ways that they can be combined that were interested in today - addition and multiplication.
 
 These are separate semigroups. You would say these are "Integers under addition" as one, and "Integers under multiplication" as the other.
-
-In order to use our append (<>) operation here, we need to wrap these numbers in a data-type that implements that append operation for the data type, so we use these Sum and Product data constructors.
-
-Subtraction and division are special cases of addition/multiplication.
 ```
 
 ---
 
-## We can combine booleans
+#### because we don't know the operation
 
-### (in more than one way)
+### we can't just say 3 <> 4
 
 ```haskell
-All True <> All False == False
-Any True <> Any False == True
+Sum 3 <> Sum 4 == Sum 7
+Product 3 <> Product 4 == Product 12
 ```
 
 ```notes
-Here are a couple of more interesting cases. Similar to how Sum/Product were a data type wrapping numbers, we're wrapping booleans here.
+So, we can't just say 3 append 4 with numbers because there is more than one way to combine them, right?
 
-Does anyone want to take a guess at what the operation is for Any and All?
+In order to use our append (<>) operation here, we need to wrap these numbers in a data-type that implements that append operation for the data type, so we use these Sum and Product data constructors where each data type will have its own implementation of the <> function, which will be + and * respectively.
 ```
 
 ---
@@ -135,7 +121,7 @@ Does anyone want to take a guess at what the operation is for Any and All?
 ## Law of Associativity
 
 ```haskell
-x <> (y <> z) = (x <> y) <> z (Semigroup law)
+x <> (y <> z) == (x <> y) <> z (Semigroup law)
 ```
 
 ```notes
@@ -155,10 +141,14 @@ You could use something like "Agda" which is a theorem prover to write proofs fo
 <List>
   <ListItem>Have an "append" operation for their data type</ListItem>
   <ListItem>The append operation obeys the Law of Associativity</ListItem>
-  <ListItem>That's it!</ListItem>
+  <ListItem>That's it! Not so bad, right?</ListItem>
 </List>
 
 ```notes
+So, to recap on Semigroups:
+
+REVEALS
+
 That is the end for Semigroups.
 ```
 
@@ -216,14 +206,6 @@ We now know a few really neat things we can do with a very tiny little bit of in
 
 ---
 
-# Back to Category Theory
-
-```notes
-So - this is an example of category theorists looking at addition, subtraction, multiplication and division — studying basic arithmatic — and identifying something that addition and multiplication have in common with each other and abstracting that out and giving it a name. Then down the road - people in programming who were also into category theory recognizing that this is much broader than just math. These concepts all started as very concrete ideas, and were gradually boiled down and abstracted to be much more generally useful.
-```
-
----
-
 # Monoid
 
 ### has one additional rule
@@ -266,10 +248,6 @@ Product 5 <> Product 1 == Product 5
 So - here are some more examples. Again, strings are just arrays of characters, so an empty string here makes sense as the identity value.
 
 Sum is 0 since adding 0 doesn't change the number. Product is 1 since multiplying by 1 doesn't change the number.
-
-How about the identity value for the All type for booleans we saw earlier? What do you think that is?
-
-And the Any boolean type?
 ```
 
 ---
@@ -309,6 +287,19 @@ An empty list — how do you return an a from an empty list of a?
 
 ---
 
+# ~~Producing a single value~~
+
+```haskell
+Semigroup a :: [a] -> a -- ILLEGAL!
+Semigroup a :: [a] -> a -> a -- 'a' in the middle is an initial value
+```
+
+```notes
+Remember this slide? This type signature is actually illegal. Similar to how the "head" function cannot return the first a in an empty list of a's, we cannot produce an a value by combining all of the a's in an empty list of a's
+```
+
+---
+
 ## You can fold/reduce a Monoid
 
 ## without providing an initial value.
@@ -332,9 +323,9 @@ mconcat = foldr '(<>)' mempty
 ```notes
 And so there is a special fold that works on Monoids that doesn't take the initial value because it already has it. That initial value is just called "empty" (mempty in Haskell) within the context of the monoid.
 
-What would happen if we were to use this function with an empty list of integers under addition?
+What would happen if we were to use this function with an empty list of integers under addition? We'd get 0. The identity value.
 
-How about multiplication?
+How about multiplication? We'd get 1. The identity value.
 
 What about an empty list of lists of integers? (result would be an empty list)
 ```
@@ -342,6 +333,10 @@ What about an empty list of lists of integers? (result would be an empty list)
 ---
 
 # Less obvious Monoids
+
+```notes
+So far we've talked about some of the more obvious monoids. Now that you have an understanding of what they are, let's look at some less obvious examples.
+```
 
 ---
 
@@ -385,7 +380,25 @@ So, booleans under the "or" operator are monoids, and so are booleans under the 
 
 ---
 
-## (a -> a) is a Monoid
+## Can functions be Monoids? 🤔
+
+```notes
+Can you take any two functions regardless of type signature and glue them together? No — if you have an (a -> b) function and a (c -> d) function, how can you compose them together? So with no constrains, we cannot say functions are monoids.
+
+Is there a type signature for functions we know we can always glue together as long as they match that type signature?
+
+What about (Int -> Int) functions? Can I take any two (Int -> Int) functions and glue them together? Can you compose those?
+- We can compose those, so it is a Semigroup.
+
+Is there an identity value? Is it a monoid?
+
+What about the identity function?
+- It does not have an effect when composed!
+```
+
+---
+
+## (a -> a) is a Monoid 🤯
 
 ```haskell
 -- compose is . or the "dot operator"
@@ -398,6 +411,28 @@ identity a = a
 mempty = identity
 ```
 
+```notes
+This one blew my mind. Functions that go from a to a under the "compose" operation are monoids.
+
+You can see the compose operation here takes two functions here (f and g) and produces another function. That function is going to take x as a value and call g with it, then pass the result into f.
+
+The reason it has (b -> c) and (a -> b) types shown here is because compose is useful outside of the context of Monoids, and so it can support functions that do change types, but we can plug (a -> a) functions in here and it works the same.
+```
+
+```haskell
+identity :: a -> a
+identity a = a
+
+doSomeMath :: Int -> Int
+doSomeMath = identity . (+3) . (*2)
+
+doSomeMath 4 == 11
+```
+
+```notes
+Here we can see a concrete example of this. We can compose (*2) with (+3) and then compose that with identity, and we get back a function that will first multiply by 2, then add three, then it goes through identity and comes right back out.
+```
+
 ---
 
-# 🤯
+# Thanks! 🙏
