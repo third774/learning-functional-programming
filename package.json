@@ -6,7 +6,7 @@
   "scripts": {
     "polymorphism": "mdx-deck ./polymorphism/deck.mdx",
     "overview-of-fp": "mdx-deck ./overview-of-fp/deck.mdx",
-    "monoids-and-functors": "mdx-deck ./monoids-and-functors/deck.mdx",
+    "monoids": "mdx-deck ./monoids/deck.mdx",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

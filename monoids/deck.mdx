@@ -419,6 +419,8 @@ You can see the compose operation here takes two functions here (f and g) and pr
 The reason it has (b -> c) and (a -> b) types shown here is because compose is useful outside of the context of Monoids, and so it can support functions that do change types, but we can plug (a -> a) functions in here and it works the same.
 ```
 
+---
+
 ```haskell
 identity :: a -> a
 identity a = a
