@@ -7,6 +7,7 @@
     "polymorphism": "mdx-deck ./polymorphism/deck.mdx",
     "overview-of-fp": "mdx-deck ./overview-of-fp/deck.mdx",
     "monoids": "mdx-deck ./monoids/deck.mdx",
+    "functors": "mdx-deck ./functors/deck.mdx",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
