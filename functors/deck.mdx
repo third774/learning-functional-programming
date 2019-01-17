@@ -1,3 +1,4 @@
+import { Image } from "mdx-deck";
 import { List, ListItem } from "../components/List";
 export { default as theme } from "../theme/theme";
 
@@ -7,8 +8,6 @@ export { default as theme } from "../theme/theme";
 
 ```notes
 Our topic today is: Functors!
-
-
 ```
 
 ---
@@ -32,7 +31,7 @@ squared = list(map(lambda x: x**2, items))
 ```notes
 We should probably start with a concrete example that everybody is probably familiar with - map. This is also called Select in LINQ for anyone familiar with C#.
 
-Map is a higher order function that lets us take an array of things and apply some transformation on each item in the array and get a new array with those transformations applied.
+Map is a higher order function that lets us take a list and a function and produce a new list with that transformation applied to each element.
 
 There are a few functor laws that we'll cover today, but structures that have this map operation on it usually are functors.
 ```
@@ -81,7 +80,7 @@ So if we previously had a list of a, let's now say that we have an "f of a". Thi
 
 If 'f' were fully polymorphic here, we actually wouldn't be able to do anything with the 'a' though. Knowing that the 'f' type is parameterized by the 'a' type doesn't do us any good if we don't know how to interact with it.
 
-So all functors MUST implement this fmap method. So, let's take a look at the implementation of fmap for lists.
+So all functors MUST implement this fmap method. Think of it as an interface. So, let's take a look at the implementation of fmap for lists.
 ```
 
 ---
@@ -98,6 +97,10 @@ So, uh - it's just map! The same map we know and love. Let's see what it would l
 ---
 
 ```haskell
+-- (:) :: a -> [a] -> [a]
+-- e.g. head : [tail, is, the, rest, of, the, list]
+-- produces [head, tail, is, the, rest, of, the, list]
+
 -- fmap :: (a -> b) -> f a -> f b
 instance Functor [] where
     fmap f []       = []
@@ -105,18 +108,19 @@ instance Functor [] where
 ```
 
 ```notes
-I've included the type signature of fmap above for reference here. So remember, it's an (a -> b) function, an "f of a", and produces an "f of b"
+I've included the type signature of fmap and the cons operator above for reference here. So remember, it's an (a -> b) function, an "f of a", and produces an "f of b"
 
 The implementation here is pretty simple, right? The first line is our case where we are handling an empty list. We cannot possibly apply the function, so we just return an empty list.
 
 On the second line, we handle the non-empty list case. We destructure the list with the cons operator - that colon. The 'x' on the left becomes the head of the list - the first element. And the 'xs' becomes the tail of the list - the rest of the items in the list.
 
-So we apply the 'fn' to the x, then use the cons operator again to join the result to the front of an array. And what do we use for the rest of the array here? We call fmap recursively on the tail, and the rest will be taken care of!
+So we apply the 'f' function (which is our a to b function) to the x, then use the cons operator again to join the result to the front of an array. And what do we use for the rest of the array here? We call fmap recursively on the tail, and the rest will be taken care of!
 ```
 
 ---
 
 ```haskell
+-- fmap :: (a -> b) -> f a -> f b
 instance Functor Maybe where
     fmap f Nothing  = Nothing
     fmap f (Just x) = Just (f x)
@@ -129,6 +133,63 @@ First we handle the Nothing case. The implementation here returns Nothing, but..
 
 Next we'll handle the Just case. We destructure the x out of the Just value here, apply f to the x, and wrap it back up in a Just
 ```
+
+---
+
+## Compose Refresher
+
+```haskell
+-- Mathematical notation: f ∘ g
+
+-- Compose in Haskell
+(.) :: (b -> c) -> (a -> b) -> a -> c
+f . g = \\x -> f (g x)
+
+stringHasEvenLength = even . length
+stringHasEvenLength' = (==0) . (`mod`2) . length
+```
+
+```notes
+Before we talk about the functor laws, it's probably worth doing a quick refresher on compose.
+
+The idea is we have two functions and want to sort of glue them together. We have an (a -> b) function, and a (b -> c) function, and we want to create an (a -> c) function
+
+In other languages, this is the pipe operator. In haskell, this is the dot operator. It is based on mathematical function composition, which uses that little circle. The mathematical notation is read as "f after g", which you could interpret as "we are going to take a value, pass it through function g, then take the resulting value, and pass it through f"
+
+And that's exactly how it is implemented. You can see the implementation of compose here. The type signature first takes f which is our (b -> c) function, then g which is our (a -> b) function, and returns an (a -> c) function. We return a lambda function that takes the value x (of type a) and passes that first into g which is our (a -> b) function, then the result goes into f which is our (b -> c) function.
+
+[GO OVER EXAMPLES]
+```
+
+---
+
+## Functors Laws
+
+<List>
+  <ListItem>
+    If you map Identity over a functor, you get back the exact same functor
+  </ListItem>
+  <ListItem>
+    If you compose two functions (f & g) together and map that over a functor,
+    it's the same as mapping f and then mapping g over the functor
+  </ListItem>
+</List>
+
+```notes
+So, functor laws.
+
+The first one is that if we map the Identity function over a functor, we will get back the same functor. It would be the same as just passing the functor through the Identity function.
+
+The second is that if you compose function f with function g together and map the resulting function over a functor, it's the same as mapping f and then mapping g over your function.
+
+This second law is especially useful for example if you have multiple transformations you want to perform on each element in a list and don't want to iterate over the list multiple times. You can compose the functions together and then map that over the list.
+```
+
+---
+
+# Things that aren't functors
+
+## (but could be?)
 
 ---
 
@@ -193,36 +254,166 @@ bimap :: Bifunctor p => (a -> b) -> (c -> d) -> p a c -> p b d
 ```
 
 ```notes
-if you don't partially apply a type, you basically have what's called a bi-functor. It is similar to functor, as the name would imply, but you can see based on the type signature here that we need to supply two functions. One for each type we'll be transforming.
+if you don't partially apply a type, you have what's called a bi-functor. It is similar to functor, as the name would imply, but you can see based on the type signature here that we need to supply two functions. One for each type we'll be transforming.
 
 So, given an (a -> b) function and a (c -> d) function, and a "p of a, c", we can produce a "p of b, d"
 ```
 
 ---
 
-## Functors Laws
+## What if we partially apply a type to (->) a b?
 
-- If you map Identity over a functor, you get back the exact same functor
-- If you compose two functions (f & g) together and map that over a functor, it's the same as mapping f and then mapping g over the functor
+### Can we turn functions into functors?
 
 ```notes
-So, functor laws.
-
-The first one is that if we map the Identity function over a functor, we will get back the same functor. It would be the same as just passing the functor through the Identity function.
-
-The second is that if you compose function f with function g together and map the resulting function over a functor, it's the same as mapping f and then mapping g over your function.
-
-This second law is especially useful for example if you have multiple transformations you want to perform on each element in a list and don't want to iterate over the list multiple times. You can compose the functions together and then map that over the list.
+So, let's start wandering off into some bind bending territory.
 ```
 
 ---
 
-## Compose Refresher
+```haskell
+((->) r) a
+-- becomes
+f a
+```
+
+```notes
+I've changed the types here from (a -> b) to (r -> a) to fit nicely with where we're going, but these names don't matter, just the fact that they are different from eachother.
+
+If we apply a fully polymorphic type to 'r' here we can turn turn "(->) r" into "f of a"! This looks like a functor, right?
+```
+
+---
 
 ```haskell
-(.) :: (b -> c) -> (a -> b) -> a -> c
-f . g = \\x -> f (g x)
+((->) r) a
+-- becomes
+f a
 
-stringIsEven = even . length
--- even = (==0) . (`mod`2)
+fmap :: Functor f => (a -> b) -> f a -> f b
 ```
+
+```notes
+Now let's look at fmap again. We need an (a -> b) function for our first argument. The second argument will be a function that takes type "r" and produces an a - we don't care what "r" is, it can be fully polymorphic here because we know its output will be what? "a"!
+
+So, we've taken an (r -> a) function, and an (a -> b) function, and we've made an (r -> b) function.
+
+Doesn't this look familiar? This is compose!
+```
+
+---
+
+# 🤯
+
+## Compose is fmap
+
+## for functions
+
+```haskell
+instance Functor (->) where
+    fmap = (.)
+```
+
+```notes
+Compose is fmap for functions! This really blew my mind.
+```
+
+---
+
+```haskell
+stringHasEvenLength = even . length
+stringHasEvenLength' = fmap even length
+
+:t fmap even length
+-- fmap even length :: Foldable t => t a -> Bool
+```
+
+```notes
+So here, we can see the type signature for the composed stringHasEvenLength function. It takes a Foldable t of a (input type of length), and returns a boolean (the output type of even). Nowhere in this signature do we see that a number is involved.
+```
+
+---
+
+# We're about to jump the shark
+
+---
+
+### What if we have a functor inside another functor and want to apply some transformation to the inner value(s)?
+
+```haskell
+[Just 3, Nothing, Just 4]
+-- How could we apply (*2) to the list of maybes?
+[[1,2], [3,4]]
+-- How could we apply (*2) to the list of lists?
+```
+
+---
+
+```haskell
+doubleFmap = fmap . fmap
+-- or
+doubleFmap' = fmap fmap fmap
+```
+
+```notes
+Remember how fmap is compose for functions? Well, since fmap is a function, we can compose two fmaps together. And since compose IS fmap for functions, we can say "fmap fmap fmap"
+```
+
+---
+
+```haskell
+doubleFmap :: (Functor f1, Functor f2) => (a -> b) -> f1 (f2 a) -> f1 (f2 b)
+```
+
+```notes
+Here's what the type signature looks like. This certainly looks like it would do the job, right? We have two different functors, f1 and f2, an (a -> b) function, and given an f1 of f2 of a, we can produce an f1 of f2 of b.
+
+Does it work?
+```
+
+---
+
+```haskell
+doubleFmap (*2) [Just 3, Nothing, Just 4]
+-- [Just 6, Nothing, Just 8]
+
+doubleFmap (*2) Just [1, 2, 3]
+-- Just [2, 4, 6]
+```
+
+```notes
+Heck yeah it does! If we run it with that list of maybes, it does the job perfectly. We can even swap the functors and it still works.
+
+So, this is pretty cool! This works with any combination of functors!
+```
+
+---
+
+```haskell
+fmap fmap fmap
+
+--                     fmap      fmap
+fmap :: Functor f => (a -> b) -> f a -> f b
+-- second fmap becomes  (a    ->       b)
+fmap :: Functor f => (a -> b) -> (f a -> f b)
+-- third fmap becomes (f a) and we get back (f b)
+fmap :: Functor f => (a -> b) -> f a -> f b
+```
+
+```notes
+So, how does this work? I'm still trying to get my head around it fully, but I've identified this much.
+
+If we look at the type signature of fmap, we can see that the second fmap becomes the (a -> b) function, and the second fmap becomes the f of a.
+
+On the second type signature line there I've added some parens around the (f of a -> f of b) for clarity of what b is here. The parens being in this position doesn't change the meaning of the expression.
+
+Also, the a here in f of a has to be the output of the function since we've had to paritally apply all other types in the function's type constructor to make it fit as a functor. So we're taking an f1 of f2 of a and wrapping up the f1 of f2 part into a single type and calling that f.
+```
+
+---
+
+# Thanks!
+
+---
+
+<Image src="https://media.giphy.com/media/Y3y5s3cfEe4Gk/giphy.gif" />
