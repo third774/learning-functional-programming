@@ -1,0 +1,198 @@
+import { List, ListItem } from "../components/List";
+export { default as theme } from "../theme/theme";
+
+# 𝝺
+
+# Applicative Functors
+
+```notes
+Today we're talking about applicative functors!
+```
+
+---
+
+## Functor Recap
+
+```haskell
+fmap :: Functor f => (a -> b) -> f a -> f b
+fmap (+1) (Just 3) -- (Just 4)
+fmap (+1) Nothing -- Nothing
+fmap (+1) [1,2,3] -- [2,3,4]
+
+(<$>) :: Functor f => (a -> b) -> f a -> f b
+(+1) <$> [1,2,3] -- [2,3,4]
+```
+
+```notes
+First let's do a quick recap on functors. It is a data structure that implements an interface. The only thing it must implement is `fmap`.
+
+The type signature of `fmap` is "for functor f", given an (a -> b) function and an 'f of a', it will produce an 'f of b'.
+
+And you can see some examples here. Remember that the point of `fmap` is that the (a -> b) function can be executed within the context of the functor. It can have its own implementation details.
+
+Down at the bottom here you can see this infix alias for `fmap`. So, it can sit between the (a -> b) function and the 'f of a'. More on that later.
+```
+
+---
+
+```haskell
+fmap (+1) (Just 3) -- (Just 4)
+-- easy peasy with a function
+-- taking only one argument
+
+-- Normal addition
+(+) 1 3 -- 4
+
+-- Is something like this possible?
+(+) (Just 1) (Just 3) -- Just 4
+```
+
+```notes
+So, `fmap` works quite nicely if you have a function that only takes one argument.
+
+What about functions that take more than one argument though? Like, for example, if we take the normal addition function here and apply it with two numbers, we get a number.
+
+What if we have two maybes of numbers, and we want to add them together if they both actually contain numbers. The ergonomics of having to check each of them would make this cumbersome and even worse would require knowledge of the implementation details of the functor, right?
+
+Let's see if we can somehow use `fmap` to help us out here.
+```
+
+---
+
+## Let's try using fmap
+
+```haskell
+fmap :: Functor f => (a -> b) -> f a -> f b
+```
+
+```notes
+Remember — fmap takes an (a -> b) function. Can a function that takes multiple arguments fit here?
+
+Let's say we have a function that takes an Int and a String and returns a Bool. If we try to use that here, what will 'a' be? It's going to have be the Int.
+
+What does that leave 'b' as? Remember partial application!
+
+b is a function! It is a (String -> Bool) function. So, this actually works!
+```
+
+---
+
+## The problem
+
+```haskell
+hrmmm :: Num a => Maybe (a -> a)
+hrmmm = fmap (+) (Just 1)
+```
+
+```notes
+So, let's try using fmap for this. We will go ahead and use a function that takes two arguments. What do we get back? f of a function that goes from (Num a -> Num a)
+
+Now we have a problem. We've got a function wrapped up inside of our functor, and unfortunately no interface to apply more values to it. `fmap` will not get us there.
+```
+
+---
+
+## What we need
+
+```haskell
+-- sometimes called "ap"
+(<*>) :: Applicative f => f (a -> b) -> f a -> f b
+```
+
+```notes
+So, what we need here is probably something like this, right? This is where applicative functors come in.
+
+Applicative functors extend from Functors, so we know the implement `fmap`. They also must implement this function which is sometimes called `ap`, which I like to think of as "apply".
+
+It takes an 'f of (a -> b)', and an 'f of a' and produces and 'f of b'.
+```
+
+---
+
+```haskell
+pure :: Applicative f => a -> f a
+```
+
+```notes
+Applicative functors also must implement this function called `pure`. All it does is takes a value of type 'a', and returns it wrapped up in the applicative functor as an 'f of a'.
+
+This is useful for lifting values up into the functor to then be applied, and also for lifting a function up into the structure so it can have values applied to it later.
+```
+
+---
+
+```haskell
+hrmmm :: Num a => Maybe (a -> a)
+hrmmm = fmap (+) (Just 1)
+
+-- apply's type for reference
+(<*>) :: Applicative f => f (a -> b) -> f a -> f b
+
+-- prefix notation
+(<*>) hrmmm (Just 3) -- Just 4
+
+-- infix function
+hrmmm <*> (Just 3) -- Just 4
+```
+
+```notes
+So, let's go back to our example here and apply the other value!
+
+We start by using `fmap` with the 'plus' function and partially applying the Just 1 to it. We're storing that in a variable called hrmmm. It is of type Maybe of a function that goes from number to number.
+
+Now we can use apply with the prefix notation and give it 'hrmmm' as the f of (a -> b) and then give it another maybe as the 'f of a', and we get back the result!
+
+Below it is written as a natural infix function that sits between the two arguments.
+```
+
+---
+
+```haskell
+(+) 1 3 -- 4
+
+(+) <$> (Just 1) <*> (Just 3) -- Just 4
+-- ☝️ look familiar?
+
+-- and using pure
+pure (+) <*> (Just 1) <*> (pure 3) -- Just 4
+```
+
+```notes
+So, all together now! On the top we have our basic addition with numbers that are not wrapped in functors. Note that the only thing delimiting the function and arguments are spaces.
+
+Now below, we can use the same addition function, and apply the first argument using the dollar sign in angle brackets, which remember is `fmap`. Then we apply the second argument with `apply`, and we get a result!
+
+Note how similar this is! The only difference is the values being applied are wrapped in applicative functors, and instead of just spaces, we are using these operators.
+
+On the very bottom here, you can see a variation on this. We can use pure to lift the function into the functor first, and then apply both of the arguments using apply, and we can even lift one of the Maybe values into a Maybe with pure.
+```
+
+---
+
+```haskell
+addThreeNumbers :: Num a => a -> a -> a
+addThreeNumbers x y z = x + y + z
+addThreeNumbers <$> (Just 1) <*> (Just 2) <*> (Just 3)
+
+addFourNumbers :: Num a => a -> a -> a -> a
+addFourNumbers w x y z = w + x + y + z
+addFourNumbers <$> (Just 1) <*> (Just 2) <*> (Just 3) <*> (Just 4)
+```
+
+```notes
+And we can use apply as many times as we need to in order to fully saturate and evaluate our function!
+```
+
+---
+
+```haskell
+(+) <$> (Just 1) <*> Nothing -- Nothing
+```
+
+```notes
+So, similar to how `fmap` allows a single argument function to be executed in the context of the functor, `apply` allows a multi-argument function to be evaluated in the context of the applicative functor.
+
+What should the result be when you try to add two Maybe numbers but one contains a Nothing? So this let's us have some validation here before we actually go executing a fucntion that assumes all values will be present.
+
+If we get any failures along the way, the function will never be called.
+```

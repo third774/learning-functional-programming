@@ -8,6 +8,7 @@
     "overview-of-fp": "mdx-deck ./overview-of-fp/deck.mdx",
     "monoids": "mdx-deck ./monoids/deck.mdx",
     "functors": "mdx-deck ./functors/deck.mdx",
+    "applicative-functors": "mdx-deck ./applicative-functors/deck.mdx",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
